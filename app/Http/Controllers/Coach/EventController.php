@@ -10,14 +10,35 @@ use Illuminate\Http\Request;
 class EventController extends Controller
 {
     public function index()
-    {
-        $coach = $this->ensureCoachProfile();
-        $events = Event::where('coach_id', $coach->id)
-            ->orderByDesc('starts_at')
-            ->paginate(10);
+{
+    $coach = $this->ensureCoachProfile();   // auto-create if missing
+    $events = Event::where('coach_id', $coach->id)
+        ->orderByDesc('starts_at')
+        ->paginate(12);
 
-        return view('coach.events.index', compact('events'));
-    }
+    return view('coach.events.index', compact('events'));
+}
+
+
+
+public function postpone(Request $request, Event $event)
+{
+    $this->authorizeCoach($event);
+
+    $data = $request->validate([
+        'postponed_to'   => ['required','date','after:now'],
+        'postpone_reason'=> ['nullable','string','max:255'],
+    ]);
+
+    $event->update([
+        'status'          => 'postponed',
+        'postponed_to'    => $data['postponed_to'],
+        'postpone_reason' => $data['postpone_reason'] ?? null,
+    ]);
+
+    return back()->with('success','Event postponed.');
+}
+
 
     public function create()
     {

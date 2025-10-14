@@ -10,20 +10,14 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'coach_id',
-        'title',
-        'sport_type',
-        'starts_at',
-        'ends_at',
-        'location',
-        'description',
-        'cover_image'
-    ];
-
-    protected $casts = [
-        'starts_at' => 'datetime',
-        'ends_at'   => 'datetime',
-    ];
+  'coach_id','title','sport_type','starts_at','ends_at','location','description','cover_image',
+  'status','postponed_to','postpone_reason'
+];
+protected $casts = [
+  'starts_at' => 'datetime',
+  'ends_at'   => 'datetime',
+  'postponed_to' => 'datetime',
+];
 
     // each event belongs to one coach
     public function coach()

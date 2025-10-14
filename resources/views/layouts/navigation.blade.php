@@ -13,18 +13,21 @@
 
                 <!-- Nav Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium hover:text-accent1">
-                        Dashboard
-                    </a>
-                    @auth
-                        @if(auth()->user()->role === 'coach')
-                            <a href="{{ route('coach.events.index') }}" class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium hover:text-accent1">
-                                My Events
-                            </a>
-                        @endif
-                    @endauth
-                </div>
-            </div>
+  @auth
+    @if(auth()->user()->role === 'coach')
+      <a href="{{ route('coach.events.index') }}" class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium hover:text-accent1">
+        My Events
+      </a>
+      <a href="{{ route('coach.events.create') }}" class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium hover:text-accent1">
+        + New Event
+      </a>
+      <a href="{{ route('coach.profile.edit') }}" class="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium hover:text-accent1">
+        Edit Coach Profile
+      </a>
+    @endif
+  @endauth
+</div>
+
 
             <!-- Right -->
             <div class="hidden sm:ms-6 sm:flex sm:items-center">

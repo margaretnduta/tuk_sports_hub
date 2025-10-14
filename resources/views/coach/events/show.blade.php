@@ -15,6 +15,26 @@
       </div>
     </div>
 
+<form method="POST" action="{{ route('coach.events.postpone',$event) }}" class="mt-4 flex flex-wrap items-end gap-2">
+  @csrf @method('PATCH')
+  <div>
+    <label class="block text-xs text-gray-600">New date & time</label>
+    <input type="datetime-local" name="postponed_to" required class="rounded border-gray-300">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-600">Reason (optional)</label>
+    <input type="text" name="postpone_reason" class="rounded border-gray-300" placeholder="Heavy rain...">
+  </div>
+  <button class="px-3 py-2 rounded bg-yellow-600 text-white hover:bg-yellow-700">Postpone</button>
+</form>
+@if($event->status==='postponed')
+  <p class="mt-2 text-sm text-yellow-700">
+    New date: {{ $event->postponed_to?->format('M d, Y H:i') }} — {{ $event->postpone_reason }}
+  </p>
+@endif
+
+
+
     @if($event->cover_image)
       <img src="{{ asset('storage/'.$event->cover_image) }}" alt="Cover image" class="rounded-lg max-w-2xl">
     @endif
@@ -125,3 +145,15 @@
     <p class="text-sm text-gray-500">No updates yet.</p>
   @endforelse
 </div>
+
+
+
+<span class="ml-2 text-xs rounded px-2 py-1
+  @class([
+    'bg-green-100 text-green-700' => $event->status==='scheduled',
+    'bg-yellow-100 text-yellow-700' => $event->status==='postponed',
+    'bg-red-100 text-red-700' => $event->status==='cancelled',
+    'bg-gray-200 text-gray-700' => $event->status==='completed',
+  ])
+">{{ ucfirst($event->status) }}</span>
+

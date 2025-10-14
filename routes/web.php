@@ -54,6 +54,8 @@ use App\Http\Controllers\Coach\ProfileController as CoachProfileController;
 Route::get('coach/profile', [CoachProfileController::class, 'edit'])->name('coach.profile.edit');
 Route::patch('coach/profile', [CoachProfileController::class, 'update'])->name('coach.profile.update');
 
+Route::patch('coach/events/{event}/postpone', [CoachEventController::class, 'postpone'])
+     ->name('coach.events.postpone');
 
 
 
