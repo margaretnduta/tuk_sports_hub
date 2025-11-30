@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Redirect all .html requests to .php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)\.html$ $1.php [NC,L,QSA]
+
+# Fix for common pages
+RedirectMatch 301 ^/TUK-SPORTS/registration\.html$ /TUK-SPORTS/registration.php
+RedirectMatch 301 ^/TUK-SPORTS/index\.html$ /TUK-SPORTS/index.php
+RedirectMatch 301 ^/TUK-SPORTS/about\.html$ /TUK-SPORTS/about.php
+RedirectMatch 301 ^/TUK-SPORTS/admin\.html$ /TUK-SPORTS/admin.php

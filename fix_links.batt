@@ -1,0 +1,12 @@
+@echo off
+echo Fixing .php to .php links in all PHP files...
+
+:: Fix all .php links in PHP files
+powershell -Command "Get-ChildItem -Path . -Filter *.php | ForEach-Object { (Get-Content $_.FullName) -replace '.php', '.php' | Set-Content $_.FullName -Encoding UTF8 }"
+
+echo All .php links have been converted to .php!
+echo.
+echo Verifying fixes...
+findstr /s /i ".php" *.php
+echo.
+pause
