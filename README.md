@@ -13,7 +13,7 @@ It brings together **coaches**, **players**, and **fans** under a unified platfo
 
 ### 💡 Core Idea
 > “Play. Coach. Cheer.”  
-A digital sports ecosystem where coaches manage events, players confirm participation, and fans follow matches and memories.
+A digital sports ecosystem where coaches manage events, players confirm participation, and fans see available events they can attend to.
 
 ---
 
