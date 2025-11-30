@@ -49,9 +49,8 @@ A digital sports ecosystem where coaches manage events, players confirm particip
 - Updates personal profile and achievements.
 
 ### 🎉 Fan
-- Follows players, coaches, and sports events.
-- Confirms attendance or interest.
-- Creates photo galleries and interacts via comments.
+- Sees available events.
+
 
 ---
 
