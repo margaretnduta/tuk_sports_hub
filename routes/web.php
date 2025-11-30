@@ -3,7 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Coach\EventController; // coach namespace
+
+// Coach controllers
+use App\Http\Controllers\Coach\EventController as CoachEventController;
+use App\Http\Controllers\Coach\EventUpdateController;
+use App\Http\Controllers\Coach\ProfileController as CoachProfileController;
+
+// Player controllers
+use App\Http\Controllers\Player\PlayerDashboardController;
+
+// Models
+use App\Models\Event;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,64 +21,87 @@ use App\Http\Controllers\Coach\EventController; // coach namespace
 |--------------------------------------------------------------------------
 */
 
-// Public landing
+// Public landing with upcoming events
 Route::get('/', function () {
-    return view('welcome');
+    $events = Event::whereIn('status', ['scheduled', 'postponed'])
+        ->orderBy('starts_at')
+        ->take(6)
+        ->get();
+
+    return view('welcome', compact('events'));
 });
 
-// Authenticated dashboard (role-based view via controller)
-Route::middleware(['auth'])->get('/dashboard', DashboardController::class)->name('dashboard');
+// Authenticated dashboard (role-based via controller)
+Route::middleware('auth')->get('/dashboard', DashboardController::class)->name('dashboard');
 
-// Profile
+// Generic user profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// ADMIN (placeholder)
-Route::middleware(['auth','role:admin'])->group(function () {
-    Route::get('/admin/coaches', fn () => 'Admin: manage coaches')->name('admin.coaches.index');
+// Admin (placeholder, can expand later)
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/coaches', function () {
+        return 'Admin: manage coaches';
+    })->name('admin.coaches.index');
 });
 
-// COACH — Event CRUD (EXPLICIT route names)
-Route::middleware(['auth','role:coach'])->group(function () {
-    Route::resource('coach/events', EventController::class)->names([
-        'index'   => 'coach.events.index',
-        'create'  => 'coach.events.create',
-        'store'   => 'coach.events.store',
-        'show'    => 'coach.events.show',
-        'edit'    => 'coach.events.edit',
-        'update'  => 'coach.events.update',
-        'destroy' => 'coach.events.destroy',
-    ]);
+/*
+|--------------------------------------------------------------------------
+| Coach routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:coach'])
+    ->prefix('coach')
+    ->name('coach.')
+    ->group(function () {
+
+        Route::resource('events', CoachEventController::class)->names('events');
+
+        Route::patch('events/{event}/postpone', [CoachEventController::class, 'postpone'])
+            ->name('events.postpone');
+
+        Route::post('events/{event}/updates', [EventUpdateController::class, 'store'])
+            ->name('events.updates.store');
+
+        Route::delete('events/{event}/updates/{update}', [EventUpdateController::class, 'destroy'])
+            ->name('events.updates.destroy');
+
+        Route::get('profile', [CoachProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('profile', [CoachProfileController::class, 'update'])->name('profile.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Player routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:player'])
+    ->prefix('player')
+    ->name('player.')
+    ->group(function () {
+        Route::post('events/{event}/availability', [PlayerDashboardController::class, 'updateAvailability'])
+            ->name('events.availability');
+
+        Route::get('profile', [PlayerDashboardController::class, 'profile'])
+            ->name('profile');
+
+        Route::post('profile', [PlayerDashboardController::class, 'updateProfile'])
+            ->name('profile.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Fan routes (placeholder for now)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:fan'])->group(function () {
+    Route::get('/fan/galleries', function () {
+        return 'Fan: galleries';
+    })->name('fan.galleries.index');
 });
-use App\Http\Controllers\Coach\EventUpdateController;
 
-Route::post('coach/events/{event}/updates', [EventUpdateController::class, 'store'])->name('coach.events.updates.store');
-Route::delete('coach/events/{event}/updates/{update}', [EventUpdateController::class, 'destroy'])->name('coach.events.updates.destroy');
-
-
-use App\Http\Controllers\Coach\ProfileController as CoachProfileController;
-
-Route::get('coach/profile', [CoachProfileController::class, 'edit'])->name('coach.profile.edit');
-Route::patch('coach/profile', [CoachProfileController::class, 'update'])->name('coach.profile.update');
-
-Route::patch('coach/events/{event}/postpone', [CoachEventController::class, 'postpone'])
-     ->name('coach.events.postpone');
-
-
-
-
-// PLAYER (placeholder)
-Route::middleware(['auth','role:player'])->group(function () {
-    Route::get('/player/events', fn () => 'Player: upcoming events')->name('player.events.index');
-});
-
-// FAN (placeholder)
-Route::middleware(['auth','role:fan'])->group(function () {
-    Route::get('/fan/galleries', fn () => 'Fan: galleries')->name('fan.galleries.index');
-});
-
-// Auth routes (login/register/etc.)
-require __DIR__.'/auth.php';
+// Auth scaffolding (Breeze)
+require __DIR__ . '/auth.php';
