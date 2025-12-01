@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Coach;
 use App\Http\Controllers\Controller;
 use App\Models\Coach;
 use App\Models\Event;
+use App\Models\EventPlayer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -48,15 +49,15 @@ class EventController extends Controller
     {
         $coach = $this->coachOrFail();
 
-       $data = $request->validate([
-    'title'       => ['required', 'string', 'max:255'],
-    'sport_type'  => ['required', 'string', 'max:100'],
-    'starts_at'   => ['required', 'date'],              // removed after:now
-    'ends_at'     => ['nullable', 'date'],              // removed after_or_equal
-    'location'    => ['required', 'string', 'max:255'],
-    'description' => ['nullable', 'string'],
-    'cover_image' => ['nullable', 'image', 'max:2048'],
-]);
+        $data = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'sport_type'  => ['required', 'string', 'max:100'],
+            'starts_at'   => ['required', 'date'],
+            'ends_at'     => ['nullable', 'date'],
+            'location'    => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'cover_image' => ['nullable', 'image', 'max:2048'],
+        ]);
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $request->file('cover_image')->store('events', 'public');
@@ -73,7 +74,12 @@ class EventController extends Controller
     public function show(Event $event)
     {
         $this->guardOwnership($event);
-        return view('coach.events.show', compact('event'));
+
+        $participations = EventPlayer::with(['player.user'])
+            ->where('event_id', $event->id)
+            ->get();
+
+        return view('coach.events.show', compact('event', 'participations'));
     }
 
     public function edit(Event $event)
@@ -86,15 +92,15 @@ class EventController extends Controller
     {
         $this->guardOwnership($event);
 
-      $data = $request->validate([
-    'title'       => ['required', 'string', 'max:255'],
-    'sport_type'  => ['required', 'string', 'max:100'],
-    'starts_at'   => ['required', 'date'],
-    'ends_at'     => ['nullable', 'date'],
-    'location'    => ['required', 'string', 'max:255'],
-    'description' => ['nullable', 'string'],
-    'cover_image' => ['nullable', 'image', 'max:2048'],
-]);
+        $data = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'sport_type'  => ['required', 'string', 'max:100'],
+            'starts_at'   => ['required', 'date'],
+            'ends_at'     => ['nullable', 'date'],
+            'location'    => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'cover_image' => ['nullable', 'image', 'max:2048'],
+        ]);
 
         if ($request->hasFile('cover_image')) {
             if ($event->cover_image && Storage::disk('public')->exists($event->cover_image)) {
@@ -125,12 +131,12 @@ class EventController extends Controller
     {
         $this->guardOwnership($event);
 
-        if ($event->status !== 'scheduled') {
+        if ($event->status !== 'scheduled' && $event->status !== 'postponed') {
             return back()->with('error', 'Only scheduled events can be postponed.');
         }
 
         $data = $request->validate([
-            'postponed_to'    => ['required', 'date', 'after:now'],
+            'postponed_to'    => ['required', 'date'],
             'postpone_reason' => ['nullable', 'string', 'max:255'],
         ]);
 

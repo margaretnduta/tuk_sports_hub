@@ -13,8 +13,6 @@ class Player extends Model
         'user_id',
         'sport',
         'availability_status',
-        'achievements',
-        'avatar_url'
     ];
 
     public function user()
@@ -22,11 +20,15 @@ class Player extends Model
         return $this->belongsTo(User::class);
     }
 
-    // many-to-many: players can join many events
+    public function eventPlayers()
+    {
+        return $this->hasMany(EventPlayer::class);
+    }
+
     public function events()
     {
         return $this->belongsToMany(Event::class, 'event_players')
-                    ->withPivot('status')
-                    ->withTimestamps();
+            ->withPivot('status')
+            ->withTimestamps();
     }
 }

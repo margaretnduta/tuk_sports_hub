@@ -41,15 +41,10 @@ class DashboardController extends Controller
                 ['sport' => 'Football', 'availability_status' => 'available']
             );
 
-            $eventsQuery = Event::whereIn('status', ['scheduled', 'postponed']);
-
-            if (!empty($player->sport)) {
-                $eventsQuery->where('sport_type', $player->sport);
-            }
-
-            $events = $eventsQuery
+            // Player sees all upcoming events, not only their sport
+            $events = Event::whereIn('status', ['scheduled', 'postponed'])
                 ->orderBy('starts_at')
-                ->take(12)
+                ->take(20)
                 ->get();
 
             $participations = $events->isEmpty()
@@ -66,7 +61,28 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Default dashboard for fan / admin etc.
+        // Fan dashboard
+        if ($user->role === 'fan') {
+            $events = Event::whereIn('status', ['scheduled', 'postponed'])
+                ->orderBy('starts_at')
+                ->take(20)
+                ->get();
+
+            $confirmedCounts = $events->isEmpty()
+                ? collect()
+                : EventPlayer::whereIn('event_id', $events->pluck('id'))
+                    ->where('status', 'confirmed')
+                    ->selectRaw('event_id, count(*) as confirmed_count')
+                    ->groupBy('event_id')
+                    ->pluck('confirmed_count', 'event_id');
+
+            return view('dashboards.fan', [
+                'events'          => $events,
+                'confirmedCounts' => $confirmedCounts,
+            ]);
+        }
+
+        // Default dashboard for other roles
         return view('dashboard');
     }
 }
