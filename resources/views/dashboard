@@ -1,0 +1,317 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg shadow-lg mb-6 p-6 text-center">
+                <h1 class="text-3xl font-bold mb-2">
+                    Welcome back, {{ Auth::user()->name }}!
+                </h1>
+                <p class="text-lg opacity-90">
+                    @php
+                        $user = Auth::user();
+                        $userType = $user->user_type ?? 'student';
+                        $sport = $user->sport ?? 'general';
+                    @endphp
+                    
+                    @if($userType == 'student')
+                        You are registered for {{ ucfirst($sport) }} 
+                        @if(isset($user->year_of_study))
+                            - Year {{ $user->year_of_study }}
+                        @endif
+                    @else
+                        You are coaching {{ ucfirst($sport) }}
+                    @endif
+                </p>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                <!-- Profile Card -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center mb-4 pb-4 border-b">
+                        <div class="text-2xl mr-3">👤</div>
+                        <h3 class="text-lg font-semibold text-gray-800">Profile Information</h3>
+                        <span class="ml-auto px-3 py-1 text-xs font-semibold rounded-full 
+                            @if(($user->registration_status ?? 'pending') == 'approved') bg-green-100 text-green-800
+                            @elseif(($user->registration_status ?? 'pending') == 'pending') bg-yellow-100 text-yellow-800
+                            @else bg-red-100 text-red-800 @endif">
+                            {{ ucfirst($user->registration_status ?? 'Pending') }}
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Full Name:</span>
+                            <span class="text-gray-600">{{ Auth::user()->name }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Email:</span>
+                            <span class="text-gray-600">{{ Auth::user()->email }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Phone:</span>
+                            <span class="text-gray-600">{{ $user->contact_number ?? 'Not provided' }}</span>
+                        </div>
+                        @if($userType == 'student' && isset($user->year_of_study))
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Year of Study:</span>
+                            <span class="text-gray-600">Year {{ $user->year_of_study }}</span>
+                        </div>
+                        @endif
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Sport:</span>
+                            <span class="text-gray-600">{{ ucfirst($sport) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Member Since:</span>
+                            <span class="text-gray-600">{{ Auth::user()->created_at->format('F j, Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Information -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center mb-4 pb-4 border-b">
+                        <div class="text-2xl mr-3">👥</div>
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            {{ $userType == 'coach' ? 'Team Members' : 'Teammates' }}
+                        </h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <!-- Sample team members - In real app, you'd loop through database -->
+                        @if($userType == 'coach')
+                            <!-- Coach view -->
+                            <div class="border-b pb-3">
+                                <div class="font-medium text-gray-800">John Doe</div>
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>johndoe</span>
+                                    <span>Year 3</span>
+                                </div>
+                            </div>
+                            <div class="border-b pb-3">
+                                <div class="font-medium text-gray-800">Jane Smith</div>
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>janesmith</span>
+                                    <span>Year 2</span>
+                                </div>
+                            </div>
+                        @else
+                            <!-- Student view -->
+                            <div class="border-b pb-3">
+                                <div class="font-medium text-gray-800">Alex Johnson</div>
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>alexj</span>
+                                    <span>Year 3</span>
+                                </div>
+                            </div>
+                            <div class="border-b pb-3">
+                                <div class="font-medium text-gray-800">Sarah Williams</div>
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>sarahw</span>
+                                    <span>Year 2</span>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <div class="text-center pt-2">
+                            <a href="{{ $userType == 'coach' ? route('team.index') : route('teammates.index') }}" 
+                               class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                View all →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center mb-4 pb-4 border-b">
+                        <div class="text-2xl mr-3">🔄</div>
+                        <h3 class="text-lg font-semibold text-gray-800">Recent Members</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="border-b pb-3">
+                            <div class="font-medium text-gray-800">Michael Brown</div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>michaelb</span>
+                                <span>Student</span>
+                            </div>
+                        </div>
+                        <div class="border-b pb-3">
+                            <div class="font-medium text-gray-800">Emily Davis</div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span>emilyd</span>
+                                <span>Student</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center pt-2">
+                            <a href="{{ route('members.index') }}" 
+                               class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                View all →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center mb-4 pb-4 border-b">
+                        <div class="text-2xl mr-3">📊</div>
+                        <h3 class="text-lg font-semibold text-gray-800">Quick Stats</h3>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Sport:</span>
+                            <span class="text-gray-600">{{ ucfirst($sport) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">User Type:</span>
+                            <span class="text-gray-600">{{ ucfirst($userType) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Status:</span>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                @if(($user->registration_status ?? 'pending') == 'approved') bg-green-100 text-green-800
+                                @elseif(($user->registration_status ?? 'pending') == 'pending') bg-yellow-100 text-yellow-800
+                                @else bg-red-100 text-red-800 @endif">
+                                {{ ucfirst($user->registration_status ?? 'Pending') }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">{{ $userType == 'coach' ? 'Team Size:' : 'Teammates:' }}</span>
+                            <span class="text-gray-600">{{ $userType == 'coach' ? '12 members' : '8 players' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Account Age:</span>
+                            <span class="text-gray-600">
+                                {{ Auth::user()->created_at->diffForHumans(null, true) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @php
+                        // Determine the correct sport page
+                        $sportPages = [
+                            'football' => route('sports.ball-games'),
+                            'basketball' => route('sports.ball-games'),
+                            'volleyball' => route('sports.ball-games'),
+                            'handball' => route('sports.ball-games'),
+                            'rugby' => route('sports.ball-games'),
+                            'athletics' => route('sports.athletics'),
+                            'martial-arts' => route('sports.martial-arts')
+                        ];
+                        $sportPage = $sportPages[$sport] ?? route('sports.index');
+                    @endphp
+
+                    <a href="{{ $sportPage }}" 
+                       class="bg-gradient-to-r from-green-600 to-green-800 text-white text-center py-3 px-4 rounded-lg font-medium hover:opacity-90 transition">
+                        View {{ ucfirst($sport) }} Page
+                    </a>
+                    
+                    <a href="{{ route('events.index') }}" 
+                       class="bg-gradient-to-r from-red-600 to-red-800 text-white text-center py-3 px-4 rounded-lg font-medium hover:opacity-90 transition">
+                        View Events
+                    </a>
+                    
+                    <a href="{{ route('schedule.index') }}" 
+                       class="bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center py-3 px-4 rounded-lg font-medium hover:opacity-90 transition">
+                        Training Schedule
+                    </a>
+                    
+                    @if($userType == 'student')
+                        <a href="{{ route('profile.edit') }}" 
+                           class="bg-gradient-to-r from-purple-600 to-purple-800 text-white text-center py-3 px-4 rounded-lg font-medium hover:opacity-90 transition">
+                            Update Profile
+                        </a>
+                    @else
+                        <a href="{{ route('admin.team') }}" 
+                           class="bg-gradient-to-r from-purple-600 to-purple-800 text-white text-center py-3 px-4 rounded-lg font-medium hover:opacity-90 transition">
+                            Manage Team
+                        </a>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Footer-like Section -->
+            <div class="mt-8 bg-gray-800 text-white rounded-lg shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div>
+                            <h4 class="font-semibold text-green-400 mb-3">Quick Links</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li><a href="{{ route('home') }}" class="hover:text-white">Home</a></li>
+                                <li><a href="{{ route('dashboard') }}" class="hover:text-white">Dashboard</a></li>
+                                <li><a href="{{ route('sports.index') }}" class="hover:text-white">Sports Programs</a></li>
+                                <li><a href="{{ route('events.index') }}" class="hover:text-white">Events Calendar</a></li>
+                                <li><a href="{{ route('contact') }}" class="hover:text-white">Contact Support</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-green-400 mb-3">Your Sports</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li><a href="{{ route('sports.ball-games') }}" class="hover:text-white">Ball Games</a></li>
+                                <li><a href="{{ route('sports.athletics') }}" class="hover:text-white">Athletics</a></li>
+                                <li><a href="{{ route('sports.martial-arts') }}" class="hover:text-white">Martial Arts</a></li>
+                                <li><a href="{{ route('sports.board-games') }}" class="hover:text-white">Board Games</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-green-400 mb-3">Support</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li><a href="{{ route('help') }}" class="hover:text-white">Help Center</a></li>
+                                <li><a href="{{ route('faq') }}" class="hover:text-white">FAQ</a></li>
+                                <li><a href="{{ route('contact') }}" class="hover:text-white">Contact Us</a></li>
+                                <li><a href="{{ route('feedback') }}" class="hover:text-white">Feedback</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-green-400 mb-3">Contact Info</h4>
+                            <div class="text-gray-300 space-y-2">
+                                <p>Sports Department</p>
+                                <p>Technical University of Kenya</p>
+                                <p>Email: sports@tukenya.ac.ke</p>
+                                <p>Phone: +254 20 2219929</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-gray-700 text-center text-gray-400 text-sm">
+                        <p>&copy; {{ date('Y') }} Technical University of Kenya. All rights reserved. | 
+                           Logged in as: {{ Auth::user()->name }} ({{ ucfirst($userType) }})</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loaded successfully');
+            
+            // Add any interactive functionality here
+            // Example: Tooltips, modal triggers, etc.
+        });
+    </script>
+    @endpush
+</x-app-layout>
+
